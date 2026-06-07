@@ -340,10 +340,17 @@ function Sidebar<T extends string>({
 }
 
 /* ─── Main export ─────────────────────────────────────── */
-export function DepositModal({ open, onOpenChange }: { open: boolean; onOpenChange(open: boolean): void }) {
-  const [tab, setTab]             = useState<Tab>("nap");
+export function DepositModal({ open, onOpenChange, initialTab }: { open: boolean; onOpenChange(open: boolean): void; initialTab?: Tab }) {
+  const [tab, setTab]             = useState<Tab>(initialTab ?? "nap");
   const [napMethod, setNapMethod] = useState<NapMethod>("qr");
   const [rutMethod, setRutMethod] = useState<RutMethod>("ngan-hang");
+
+  // Sync tab when modal opens with a different initialTab
+  const prevOpen = useRef(false);
+  useEffect(() => {
+    if (open && !prevOpen.current && initialTab) setTab(initialTab);
+    prevOpen.current = open;
+  }, [open, initialTab]);
 
   /* QR Receipt */
   const [napStep, setNapStep] = useState<"input"|"receipt">("input");

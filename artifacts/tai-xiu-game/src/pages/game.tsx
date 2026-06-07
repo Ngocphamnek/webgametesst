@@ -3,7 +3,6 @@ import { useGetMe, useGetBalance, useGetBetHistory } from "@workspace/api-client
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { DepositModal } from "@/components/deposit-modal";
-import { BubbleMiniGame } from "@/components/bubble-mini-game";
 import { useToast } from "@/hooks/use-toast";
 const topNavImg = "/top-nav.png";
 const bottomBarImg = "/bottom-bar.png";
@@ -439,7 +438,7 @@ function ThemedGameCard({ g }: { g: GameDef }) {
 /* ─── Main component ─────────────────────────────────────────────────── */
 export default function Game() {
   const [depositOpen, setDepositOpen]   = useState(false);
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [depositInitTab, setDepositInitTab] = useState<"nap"|"rut"|"ket-sat"|"lich-su">("nap");
   const [notifOpen, setNotifOpen]       = useState(false);
   const [profileOpen, setProfileOpen]   = useState(false);
   const [idCopied, setIdCopied]         = useState(false);
@@ -465,7 +464,6 @@ export default function Game() {
   const [missionsOpen, setMissionsOpen] = useState(false);
   const [missionTab, setMissionTab]     = useState<"daily"|"newbie">("daily");
   const [gameWheelOpen, setGameWheelOpen] = useState(false);
-  const [bubbleOpen, setBubbleOpen]       = useState(false);
   /* Settings toggles (KCLUB style) */
   const [autoReady, setAutoReady]   = useState(false);
   const [effects, setEffects]       = useState(true);
@@ -967,8 +965,8 @@ export default function Game() {
           />
           {/* Invisible click zones — only bottom 55% of image (actual icon strip, not dragon deco above) */}
           <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"55%" }}>
-            <button style={{ position:"absolute", left:"0%",  width:"14%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Sân Hủ"    onClick={() => setGameWheelOpen(true)} />
-            <button style={{ position:"absolute", left:"14%", width:"16%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Nhiệm Vụ" onClick={() => setMissionsOpen(true)} />
+            <button style={{ position:"absolute", left:"0%",  width:"14%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Rút Tiền"   onClick={() => { setDepositInitTab("rut"); setDepositOpen(true); }} />
+            <button style={{ position:"absolute", left:"14%", width:"16%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Thông Báo" onClick={() => setNotifOpen(v => !v)} />
             <button style={{ position:"absolute", left:"30%", width:"40%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Nạp Tiền" onClick={() => setDepositOpen(true)} />
             <button style={{ position:"absolute", left:"70%", width:"15%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Hỗ Trợ" onClick={() => toast({ title:"💬 Hỗ Trợ 24/7", description:"Liên hệ Zalo: 0909 xxx xxx | Telegram: @haru88support" })} />
             <button style={{ position:"absolute", left:"85%", width:"15%", height:"100%", background:"none", border:"none", cursor:"pointer" }} title="Cài Đặt"   onClick={openSettings} />
@@ -1018,37 +1016,6 @@ export default function Game() {
         </div>
       )}
 
-      {/* ── Withdraw Modal ── */}
-      {withdrawOpen && (
-        <div style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", justifyContent:"center" }} onClick={() => setWithdrawOpen(false)}>
-          <div style={{ background:"linear-gradient(160deg,#1a0000,#0d0000)", border:"1px solid rgba(200,40,40,0.35)", borderRadius:18, padding:"24px", width:"clamp(290px,90vw,380px)", boxShadow:"0 20px 70px rgba(0,0,0,0.95)" }} onClick={e => e.stopPropagation()}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-              <span style={{ color:"white", fontWeight:900, fontSize:17, letterSpacing:1 }}>💸 RÚT TIỀN</span>
-              <button onClick={() => setWithdrawOpen(false)} style={{ background:"none", border:"none", color:"#666", cursor:"pointer", fontSize:24 }}>×</button>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:13 }}>
-              <div><label style={{ color:"#aaa", fontSize:12, fontWeight:600, display:"block", marginBottom:5 }}>Số tài khoản ngân hàng</label>
-                <input placeholder="Nhập số tài khoản..." style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:9, padding:"10px 14px", color:"white", fontSize:13, outline:"none" }} /></div>
-              <div><label style={{ color:"#aaa", fontSize:12, fontWeight:600, display:"block", marginBottom:5 }}>Ngân hàng</label>
-                <select style={{ width:"100%", background:"rgba(20,0,0,0.9)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:9, padding:"10px 14px", color:"white", fontSize:13, outline:"none" }}>
-                  {["Vietcombank","Techcombank","MB Bank","Agribank","BIDV","VPBank"].map(b => <option key={b} style={{ background:"#1a0000" }}>{b}</option>)}
-                </select></div>
-              <div><label style={{ color:"#aaa", fontSize:12, fontWeight:600, display:"block", marginBottom:5 }}>Số tiền rút (tối thiểu 100.000đ)</label>
-                <input type="number" placeholder="0" min={100000} style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:9, padding:"10px 14px", color:"#ffd700", fontSize:15, fontWeight:700, outline:"none" }} /></div>
-              <div style={{ display:"flex", gap:8 }}>
-                {[500000,1000000,2000000,5000000].map(v => (
-                  <button key={v} style={{ flex:1, padding:"6px 0", borderRadius:8, background:"rgba(180,0,0,0.25)", border:"1px solid rgba(200,0,0,0.3)", color:"#ff9999", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-                    {(v/1000000).toFixed(v<1000000?1:0)}M
-                  </button>
-                ))}
-              </div>
-              <button style={{ marginTop:2, padding:"13px", borderRadius:11, background:"linear-gradient(135deg,#dc2626,#7f1d1d)", color:"white", fontWeight:900, fontSize:15, letterSpacing:1, border:"1px solid rgba(255,100,100,0.2)", cursor:"pointer", boxShadow:"0 0 20px rgba(220,38,38,0.5)" }}>
-                XÁC NHẬN RÚT TIỀN
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Settings Modal (KCLUB style 4-tab) ── */}
       {settingsOpen && (
@@ -1711,116 +1678,8 @@ export default function Game() {
         </div>
       )}
 
-      <DepositModal open={depositOpen} onOpenChange={setDepositOpen} />
+      <DepositModal open={depositOpen} onOpenChange={setDepositOpen} initialTab={depositInitTab} />
 
-      {/* ── Floating Bubble Mini Game Button ── */}
-      {!bubbleOpen && (
-        <button
-          onClick={() => setBubbleOpen(true)}
-          style={{
-            position: "fixed",
-            right: "clamp(10px,2vw,20px)",
-            bottom: "clamp(80px,10vh,120px)",
-            width: "clamp(52px,6vw,68px)",
-            height: "clamp(52px,6vw,68px)",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg,#7c3aed,#4f46e5,#db2777)",
-            border: "2.5px solid rgba(255,255,255,0.35)",
-            cursor: "pointer",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-            zIndex: 9000,
-            boxShadow: "0 0 24px rgba(124,58,237,0.7), 0 0 50px rgba(124,58,237,0.3), 0 4px 20px rgba(0,0,0,0.6)",
-            animation: "bubbleFloat 2.5s ease-in-out infinite",
-            outline: "none",
-          }}
-        >
-          <style>{`
-            @keyframes bubbleFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-8px) scale(1.04)} }
-            @keyframes bubblePop { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
-          `}</style>
-          <span style={{ fontSize: "clamp(20px,2.5vw,28px)", lineHeight: 1 }}>🫧</span>
-          <span style={{ color: "#fff", fontSize: "clamp(7px,0.75vw,9px)", fontWeight: 900, letterSpacing: 0.5, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>BẮN BÃO</span>
-        </button>
-      )}
-
-      {/* ── Bubble Mini Game Panel ── */}
-      {bubbleOpen && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 9500,
-          background: "rgba(0,0,0,0.92)",
-          backdropFilter: "blur(10px)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          {/* Title bar */}
-          <div style={{
-            width: "100%",
-            maxWidth: 620,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 16px 12px",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 26 }}>🫧</span>
-              <div>
-                <div style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: 1 }}>BẮN BÃO THẦN TÀI</div>
-                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Bắn bong bóng nhận thưởng!</div>
-              </div>
-            </div>
-            <button onClick={() => setBubbleOpen(false)} style={{
-              background: "rgba(255,255,255,0.1)",
-              border: "1.5px solid rgba(255,255,255,0.2)",
-              borderRadius: "50%",
-              width: 36, height: 36,
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 18,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>✕</button>
-          </div>
-          {/* Game area */}
-          <div style={{
-            width: "min(620px,96vw)",
-            height: "min(440px,70vh)",
-            background: "linear-gradient(180deg,#0d0020 0%,#1a0038 40%,#0d001a 100%)",
-            borderRadius: 20,
-            border: "2px solid rgba(124,58,237,0.5)",
-            boxShadow: "0 0 60px rgba(124,58,237,0.3), inset 0 0 80px rgba(0,0,0,0.5)",
-            overflow: "hidden",
-            position: "relative",
-          }}>
-            {/* Star particles background */}
-            <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
-              {[...Array(20)].map((_, i) => (
-                <div key={i} style={{
-                  position: "absolute",
-                  width: 2, height: 2,
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.4)",
-                  left: `${(i * 17 + 3) % 100}%`,
-                  top: `${(i * 23 + 7) % 100}%`,
-                  boxShadow: "0 0 4px rgba(255,255,255,0.3)",
-                }} />
-              ))}
-            </div>
-            <BubbleMiniGame onEarn={(amount) => {
-              toast({ title: `+${amount.toLocaleString("vi-VN")}đ`, description: "Bắn bong bóng thắng!", duration: 1500 });
-            }} />
-          </div>
-          <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 10 }}>
-            Mini game vui — điểm thưởng được tích lũy trong phiên
-          </div>
-        </div>
-      )}
 
       </div>{/* ── end rotated game container ── */}
     </>
