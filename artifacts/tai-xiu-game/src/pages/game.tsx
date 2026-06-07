@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useGetMe, useGetBalance } from "@workspace/api-client-react";
+import { useGetMe, useGetBalance, useGetBetHistory } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { DepositModal } from "@/components/deposit-modal";
@@ -112,6 +112,40 @@ const TOP_NAV = [
   { key: "naptien",  label: "NẠP TIỀN", emoji: "💳" },
   { key: "vongquay", label: "VÒNG QUAY",emoji: "🎡" },
   { key: "giftcode", label: "GIFTCODE",  emoji: "🎀" },
+];
+
+/* ─── Preset avatar data ─────────────────────────────────────────────── */
+const PRESET_AVATARS = [
+  { id:1,  bg:"linear-gradient(135deg,#1a0a2e,#3d1a6e)", char:"侠", glow:"#7c3aed" },
+  { id:2,  bg:"linear-gradient(135deg,#1a0000,#5a0000)", char:"龙", glow:"#dc2626" },
+  { id:3,  bg:"linear-gradient(135deg,#001a14,#004a38)", char:"凤", glow:"#059669" },
+  { id:4,  bg:"linear-gradient(135deg,#1a1000,#4a2e00)", char:"将", glow:"#d97706" },
+  { id:5,  bg:"linear-gradient(135deg,#00102e,#002054)", char:"帝", glow:"#0284c7" },
+  { id:6,  bg:"linear-gradient(135deg,#2e001a,#600038)", char:"后", glow:"#db2777" },
+  { id:7,  bg:"linear-gradient(135deg,#1a1400,#3c2e00)", char:"剑", glow:"#ca8a04" },
+  { id:8,  bg:"linear-gradient(135deg,#0a002e,#200060)", char:"神", glow:"#7c3aed" },
+  { id:9,  bg:"linear-gradient(135deg,#1e0a00,#4a1a00)", char:"武", glow:"#ea580c" },
+  { id:10, bg:"linear-gradient(135deg,#001e1e,#004444)", char:"仙", glow:"#0d9488" },
+  { id:11, bg:"linear-gradient(135deg,#2e1a00,#603800)", char:"虎", glow:"#f59e0b" },
+  { id:12, bg:"linear-gradient(135deg,#001428,#00285c)", char:"鹰", glow:"#3b82f6" },
+  { id:13, bg:"linear-gradient(135deg,#2e0028,#640058)", char:"妖", glow:"#e879f9" },
+  { id:14, bg:"linear-gradient(135deg,#001400,#004000)", char:"豪", glow:"#22c55e" },
+  { id:15, bg:"linear-gradient(135deg,#2e0000,#780000)", char:"霸", glow:"#ef4444" },
+  { id:16, bg:"linear-gradient(135deg,#1e1e00,#444400)", char:"王", glow:"#eab308" },
+  { id:17, bg:"linear-gradient(135deg,#00102e,#002464)", char:"雷", glow:"#60a5fa" },
+  { id:18, bg:"linear-gradient(135deg,#2e1400,#622c00)", char:"火", glow:"#fb923c" },
+  { id:19, bg:"linear-gradient(135deg,#001428,#002c5a)", char:"冰", glow:"#67e8f9" },
+  { id:20, bg:"linear-gradient(135deg,#14001e,#300046)", char:"魔", glow:"#c084fc" },
+  { id:21, bg:"linear-gradient(135deg,#001e14,#004030)", char:"圣", glow:"#4ade80" },
+  { id:22, bg:"linear-gradient(135deg,#1e0014,#440030)", char:"天", glow:"#f472b6" },
+  { id:23, bg:"linear-gradient(135deg,#141400,#2c2c00)", char:"地", glow:"#a3e635" },
+  { id:24, bg:"linear-gradient(135deg,#0a1e28,#143c50)", char:"战", glow:"#38bdf8" },
+  { id:25, bg:"linear-gradient(135deg,#280014,#600030)", char:"狼", glow:"#f87171" },
+  { id:26, bg:"linear-gradient(135deg,#14001e,#300044)", char:"蛟", glow:"#a78bfa" },
+  { id:27, bg:"linear-gradient(135deg,#001e28,#003c50)", char:"海", glow:"#22d3ee" },
+  { id:28, bg:"linear-gradient(135deg,#1e1400,#443000)", char:"金", glow:"#fbbf24" },
+  { id:29, bg:"linear-gradient(135deg,#0e1e00,#1e3c00)", char:"玉", glow:"#86efac" },
+  { id:30, bg:"linear-gradient(135deg,#0a0a28,#181848)", char:"皇", glow:"#818cf8" },
 ];
 
 /* ─── Bottom-bar button styles (must be before Game component) ───────── */
@@ -409,19 +443,24 @@ export default function Game() {
   const [notifOpen, setNotifOpen]       = useState(false);
   const [profileOpen, setProfileOpen]   = useState(false);
   const [idCopied, setIdCopied]         = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsView, setSettingsView] = useState<"main"|"password">("main");
-  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem("sound_enabled") !== "false");
-  const [volume, setVolume]             = useState(() => parseInt(localStorage.getItem("sound_volume") ?? "70"));
-  const [oldPw, setOldPw]               = useState("");
-  const [newPw, setNewPw]               = useState("");
-  const [confirmPw, setConfirmPw]       = useState("");
-  const [pwError, setPwError]           = useState("");
-  const [pwSuccess, setPwSuccess]       = useState(false);
-  const [pwLoading, setPwLoading]       = useState(false);
-  const [readMsgs, setReadMsgs]         = useState<Set<number>>(new Set());
-  const [avatar, setAvatar]             = useState<string | null>(null);
-  const [avatarHover, setAvatarHover]   = useState(false);
+  const [settingsOpen, setSettingsOpen]   = useState(false);
+  const [settingsTab, setSettingsTab]     = useState<"taikhoan"|"matkhau"|"baomat"|"lichsu">("taikhoan");
+  const [soundEnabled, setSoundEnabled]   = useState(() => localStorage.getItem("sound_enabled") !== "false");
+  const [volume, setVolume]               = useState(() => parseInt(localStorage.getItem("sound_volume") ?? "70"));
+  const [oldPw, setOldPw]                 = useState("");
+  const [newPw, setNewPw]                 = useState("");
+  const [confirmPw, setConfirmPw]         = useState("");
+  const [pwError, setPwError]             = useState("");
+  const [pwSuccess, setPwSuccess]         = useState(false);
+  const [pwLoading, setPwLoading]         = useState(false);
+  const [showOldPw, setShowOldPw]         = useState(false);
+  const [showNewPw, setShowNewPw]         = useState(false);
+  const [showConfPw, setShowConfPw]       = useState(false);
+  const [readMsgs, setReadMsgs]           = useState<Set<number>>(new Set());
+  const [avatar, setAvatar]               = useState<string | null>(null);
+  const [avatarHover, setAvatarHover]     = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [selectedPreset, setSelectedPreset]     = useState<number | null>(null);
   /* New modals */
   const [missionsOpen, setMissionsOpen] = useState(false);
   const [missionTab, setMissionTab]     = useState<"daily"|"newbie">("daily");
@@ -439,7 +478,7 @@ export default function Game() {
   const dragScrollLeft = useRef(0);
   const hasDragged     = useRef(false);
 
-  const { logout }  = useAuth();
+  const { logout, token }  = useAuth();
   const { toast }   = useToast();
   const [, setLocation] = useLocation();
   const { data: user }        = useGetMe();
@@ -451,8 +490,15 @@ export default function Game() {
   const unread   = 3 - readMsgs.size;
 
   useEffect(() => {
-    if (user?.id) { const s = localStorage.getItem(`avatar_${user.id}`); if (s) setAvatar(s); }
+    if (user?.id) {
+      const s = localStorage.getItem(`avatar_${user.id}`);
+      if (s) setAvatar(s);
+      const p = localStorage.getItem(`preset_${user.id}`);
+      if (p) setSelectedPreset(Number(p));
+    }
   }, [user?.id]);
+
+  const betHistory = useGetBetHistory({ request: { headers: { Authorization: `Bearer ${token}` } } });
 
   useEffect(() => {
     const el = carouselRef.current;
@@ -545,7 +591,13 @@ export default function Game() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file || !user?.id) return;
     const reader = new FileReader();
-    reader.onload = () => { const d = reader.result as string; setAvatar(d); localStorage.setItem(`avatar_${user.id}`, d); };
+    reader.onload = () => {
+      const d = reader.result as string;
+      setAvatar(d);
+      setSelectedPreset(null);
+      localStorage.setItem(`avatar_${user.id}`, d);
+      localStorage.removeItem(`preset_${user.id}`);
+    };
     reader.readAsDataURL(file); e.target.value = "";
   };
 
@@ -560,8 +612,8 @@ export default function Game() {
     setVolume(v);
     localStorage.setItem("sound_volume", String(v));
   };
-  const openSettings = () => { setSettingsView("main"); setSettingsOpen(true); };
-  const closeSettings = () => { setSettingsOpen(false); setOldPw(""); setNewPw(""); setConfirmPw(""); setPwError(""); setPwSuccess(false); };
+  const openSettings = () => { setSettingsTab("taikhoan"); setSettingsOpen(true); };
+  const closeSettings = () => { setSettingsOpen(false); setOldPw(""); setNewPw(""); setConfirmPw(""); setPwError(""); setPwSuccess(false); setShowOldPw(false); setShowNewPw(false); setShowConfPw(false); };
 
   const handleChangePw = async () => {
     setPwError("");
@@ -998,130 +1050,173 @@ export default function Game() {
         </div>
       )}
 
-      {/* ── Settings Modal ── */}
+      {/* ── Settings Modal (KCLUB style 4-tab) ── */}
       {settingsOpen && (
-        <div style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(0,0,0,0.75)", backdropFilter:"blur(8px)", display:"flex", alignItems:"flex-end", justifyContent:"center" }} onClick={closeSettings}>
+        <div style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(0,0,0,0.82)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center" }} onClick={closeSettings}>
           <div onClick={e => e.stopPropagation()} style={{
-            width:"clamp(300px,92vw,420px)", marginBottom:"clamp(90px,14vh,140px)",
-            background:"linear-gradient(175deg,rgba(10,10,25,0.98),rgba(5,5,18,0.99))",
-            border:"1px solid rgba(148,163,184,0.2)", borderRadius:22,
-            boxShadow:"0 -4px 60px rgba(0,0,0,0.9), 0 0 40px rgba(100,120,200,0.1)",
+            width:"clamp(340px,90vw,520px)",
+            background:"linear-gradient(160deg,#1a0d00,#0f0800,#1a0d00)",
+            border:"2px solid rgba(180,120,0,0.6)",
+            borderRadius:18,
+            boxShadow:"0 0 0 1px rgba(255,200,0,0.08), 0 32px 80px rgba(0,0,0,0.97), 0 0 40px rgba(180,120,0,0.2)",
             overflow:"hidden",
           }}>
             {/* Header */}
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"16px 20px", background:"rgba(148,163,184,0.07)", borderBottom:"1px solid rgba(148,163,184,0.1)" }}>
-              {settingsView === "password" ? (
-                <button onClick={() => { setSettingsView("main"); setPwError(""); setPwSuccess(false); }} style={{ background:"none", border:"none", color:"#94a3b8", cursor:"pointer", display:"flex", alignItems:"center", gap:6, fontSize:13, fontWeight:700, padding:0 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-                  Quay lại
-                </button>
-              ) : (
-                <span style={{ color:"white", fontWeight:900, fontSize:15, letterSpacing:1 }}>⚙️ CÀI ĐẶT</span>
-              )}
-              <button onClick={closeSettings} style={{ background:"none", border:"none", color:"#555", cursor:"pointer", fontSize:24, lineHeight:1, padding:0 }}>×</button>
+            <div style={{ position:"relative", padding:"14px 20px", background:"linear-gradient(135deg,rgba(180,120,0,0.25),rgba(100,60,0,0.2))", borderBottom:"1.5px solid rgba(180,120,0,0.35)", textAlign:"center" }}>
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(255,200,0,0.8),rgba(255,160,0,0.9),rgba(255,200,0,0.8),transparent)" }} />
+              <span style={{ color:"#f5d060", fontWeight:900, fontSize:17, letterSpacing:2, textShadow:"0 0 20px rgba(255,200,0,0.5)" }}>CÀI ĐẶT</span>
+              <button onClick={closeSettings} style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"linear-gradient(135deg,#7f1d1d,#450a0a)", border:"1.5px solid rgba(239,68,68,0.5)", borderRadius:"50%", width:28, height:28, color:"#fff", fontWeight:900, fontSize:16, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
             </div>
 
-            {settingsView === "main" ? (
-              <div style={{ padding:"18px 20px", display:"flex", flexDirection:"column", gap:12 }}>
+            {/* Tabs */}
+            <div style={{ display:"flex", borderBottom:"1.5px solid rgba(180,120,0,0.25)", background:"rgba(0,0,0,0.3)" }}>
+              {([
+                { key:"taikhoan", label:"TÀI KHOẢN" },
+                { key:"matkhau",  label:"MẬT KHẨU"  },
+                { key:"baomat",   label:"BẢO MẬT"   },
+                { key:"lichsu",   label:"LỊCH SỬ CƯỢC" },
+              ] as const).map(tab => (
+                <button key={tab.key} onClick={() => setSettingsTab(tab.key)} style={{
+                  flex:1, padding:"11px 4px", border:"none", cursor:"pointer",
+                  fontSize:"clamp(9px,1vw,11px)", fontWeight:800, letterSpacing:"0.5px",
+                  background: settingsTab===tab.key ? "rgba(180,120,0,0.25)" : "transparent",
+                  color: settingsTab===tab.key ? "#f5d060" : "rgba(200,160,80,0.45)",
+                  borderBottom: settingsTab===tab.key ? "2.5px solid #f5d060" : "2.5px solid transparent",
+                  transition:"all 0.15s",
+                }}>{tab.label}</button>
+              ))}
+            </div>
 
-                {/* KCLUB-style toggle grid */}
-                {(() => {
-                  const toggles: { label: string; value: boolean; set: (v: boolean) => void }[] = [
+            {/* Tab content */}
+            <div style={{ minHeight:280, maxHeight:"60vh", overflowY:"auto" }}>
+
+              {/* ── TÀI KHOẢN ── */}
+              {settingsTab === "taikhoan" && (
+                <div style={{ padding:"18px 20px", display:"flex", flexDirection:"column", gap:11 }}>
+                  {([
                     { label:"Tự động sẵn sàng", value:autoReady,    set:setAutoReady },
-                    { label:"Hiệu ứng",          value:effects,      set:setEffects   },
+                    { label:"Hiệu ứng âm thanh", value:effects,      set:setEffects   },
                     { label:"Nhận lời mời",       value:acceptInvite, set:setAccInv    },
-                    { label:"Nhạc nền",           value:bgMusic,      set:(v) => { setBgMusic(v); setSoundEnabled(v); } },
+                    { label:"Nhạc nền",           value:bgMusic,      set:(v: boolean) => { setBgMusic(v); setSoundEnabled(v); } },
                     { label:"Thông báo Hủ",       value:jackpotNotif, set:setJackpot  },
-                  ];
-                  return (
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-                      {toggles.map((t, i) => (
-                        <div key={t.label} onClick={() => t.set(!t.value)}
-                          style={{
-                            gridColumn: i === 4 ? "1 / -1" : undefined,
-                            display:"flex", alignItems:"center", justifyContent:"space-between",
-                            background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)",
-                            borderRadius:12, padding:"12px 14px", cursor:"pointer", gap:10,
-                          }}>
-                          <span style={{ color:"rgba(255,255,255,0.85)", fontSize:13, fontWeight:600 }}>{t.label}</span>
-                          <div style={{
-                            width:44, height:24, borderRadius:12, flexShrink:0,
-                            background: t.value ? "linear-gradient(135deg,#c41c00,#7f0000)" : "rgba(255,255,255,0.1)",
-                            border: t.value ? "1px solid rgba(255,80,60,0.5)" : "1px solid rgba(255,255,255,0.12)",
-                            position:"relative", transition:"all 0.2s",
-                            boxShadow: t.value ? "0 0 10px rgba(200,28,0,0.45)" : "none",
-                          }}>
-                            <div style={{
-                              position:"absolute", top:3, width:16, height:16, borderRadius:"50%",
-                              background:"white", boxShadow:"0 1px 4px rgba(0,0,0,0.4)", transition:"left 0.2s",
-                              left: t.value ? 23 : 3,
-                            }} />
+                  ]).map((t, i, arr) => (
+                    <div key={t.label} onClick={() => t.set(!t.value)} style={{
+                      display:"flex", alignItems:"center", justifyContent:"space-between",
+                      background:"rgba(255,200,0,0.04)", border:"1px solid rgba(255,200,0,0.1)",
+                      borderRadius:12, padding:"12px 16px", cursor:"pointer", gap:10,
+                    }}>
+                      <span style={{ color:"rgba(255,230,180,0.9)", fontSize:13, fontWeight:600 }}>{t.label}</span>
+                      <div style={{ width:46, height:25, borderRadius:13, flexShrink:0, position:"relative", transition:"all 0.2s",
+                        background: t.value ? "linear-gradient(135deg,#b45309,#d97706)" : "rgba(255,255,255,0.12)",
+                        border: t.value ? "1px solid rgba(245,158,11,0.6)" : "1px solid rgba(255,255,255,0.15)",
+                        boxShadow: t.value ? "0 0 12px rgba(217,119,6,0.5)" : "none",
+                      }}>
+                        <div style={{ position:"absolute", top:3, width:17, height:17, borderRadius:"50%", background:"white", transition:"left 0.2s", boxShadow:"0 1px 4px rgba(0,0,0,0.4)", left: t.value ? 25 : 3 }} />
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => { closeSettings(); handleLogout(); }} style={{ marginTop:6, background:"rgba(220,38,38,0.12)", border:"1px solid rgba(220,38,38,0.4)", borderRadius:12, padding:"13px 16px", cursor:"pointer", display:"flex", alignItems:"center", gap:10, width:"100%" }}>
+                    <span style={{ fontSize:18 }}>🚪</span>
+                    <span style={{ color:"#f87171", fontWeight:700, fontSize:13 }}>Đăng Xuất</span>
+                  </button>
+                  <div style={{ textAlign:"center", color:"rgba(255,255,255,0.2)", fontSize:11 }}>Version 1.0.0</div>
+                </div>
+              )}
+
+              {/* ── MẬT KHẨU ── */}
+              {settingsTab === "matkhau" && (
+                <div style={{ padding:"20px", display:"flex", flexDirection:"column", gap:14 }}>
+                  {pwSuccess ? (
+                    <div style={{ textAlign:"center", padding:"30px 0", display:"flex", flexDirection:"column", alignItems:"center", gap:12 }}>
+                      <div style={{ fontSize:52 }}>✅</div>
+                      <div style={{ color:"#4ade80", fontWeight:900, fontSize:16 }}>Đổi mật khẩu thành công!</div>
+                      <button onClick={() => { setSettingsTab("taikhoan"); setPwSuccess(false); }} style={{ padding:"10px 28px", borderRadius:10, background:"linear-gradient(135deg,#b45309,#d97706)", border:"none", color:"white", fontWeight:800, fontSize:13, cursor:"pointer" }}>Xong</button>
+                    </div>
+                  ) : (
+                    <>
+                      {([
+                        { label:"Nhập mật khẩu hiện tại", value:oldPw, setter:setOldPw, show:showOldPw, setShow:setShowOldPw },
+                        { label:"Nhập mật khẩu mới",      value:newPw, setter:setNewPw, show:showNewPw, setShow:setShowNewPw },
+                        { label:"Xác nhận mật khẩu mới",  value:confirmPw, setter:setConfirmPw, show:showConfPw, setShow:setShowConfPw },
+                      ] as const).map(f => (
+                        <div key={f.label}>
+                          <div style={{ position:"relative" }}>
+                            <input
+                              type={f.show ? "text" : "password"}
+                              value={f.value}
+                              onChange={e => { f.setter(e.target.value as any); setPwError(""); }}
+                              placeholder={f.label}
+                              style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.06)", border:"1.5px solid rgba(180,120,0,0.3)", borderRadius:10, padding:"13px 44px 13px 16px", color:"white", fontSize:13, outline:"none", fontFamily:"inherit" }}
+                            />
+                            <button type="button" onClick={() => f.setShow(!f.show)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:"rgba(200,160,80,0.7)", padding:0, display:"flex", alignItems:"center" }}>
+                              {f.show
+                                ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              }
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {pwError && <div style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:8, padding:"8px 12px", color:"#fca5a5", fontSize:12, fontWeight:600 }}>⚠️ {pwError}</div>}
+                      <button onClick={handleChangePw} disabled={pwLoading || !oldPw || !newPw || !confirmPw}
+                        style={{ padding:"14px", borderRadius:12, background: (!oldPw||!newPw||!confirmPw||pwLoading) ? "rgba(180,120,0,0.2)" : "linear-gradient(135deg,#b45309,#92400e)", color:"white", fontWeight:900, fontSize:14, letterSpacing:1, border:`1px solid ${(!oldPw||!newPw||!confirmPw||pwLoading) ? "rgba(180,120,0,0.2)" : "rgba(245,158,11,0.5)"}`, cursor: (!oldPw||!newPw||!confirmPw||pwLoading) ? "not-allowed" : "pointer", transition:"all 0.2s", boxShadow: (!oldPw||!newPw||!confirmPw||pwLoading) ? "none" : "0 0 20px rgba(180,120,0,0.4)" }}>
+                        {pwLoading ? "Đang xử lý..." : "XÁC NHẬN"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* ── BẢO MẬT ── */}
+              {settingsTab === "baomat" && (
+                <div style={{ padding:"24px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:20 }}>
+                  <div style={{ background:"linear-gradient(135deg,rgba(180,120,0,0.15),rgba(100,60,0,0.1))", border:"1.5px solid rgba(180,120,0,0.35)", borderRadius:14, padding:"14px 22px", display:"flex", alignItems:"center", gap:12, width:"100%", boxSizing:"border-box" }}>
+                    <div style={{ width:44, height:44, borderRadius:10, background:"linear-gradient(135deg,#b45309,#92400e)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>💬</div>
+                    <div>
+                      <div style={{ color:"#f5d060", fontWeight:900, fontSize:13, letterSpacing:0.5 }}>SMS OTP</div>
+                      <div style={{ color:"rgba(200,160,80,0.6)", fontSize:11, marginTop:2 }}>Xác thực 2 bước qua tin nhắn</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"center", padding:"10px 0" }}>
+                    <div style={{ fontSize:52, marginBottom:12 }}>📱</div>
+                    <div style={{ color:"rgba(255,230,180,0.85)", fontWeight:700, fontSize:15, lineHeight:1.6, textAlign:"center" }}>Kích hoạt Số Điện Thoại<br/>để bảo vệ Tài Khoản của bạn!</div>
+                  </div>
+                  <button style={{ padding:"14px 48px", borderRadius:12, background:"linear-gradient(135deg,#b45309,#d97706)", border:"1.5px solid rgba(245,158,11,0.5)", color:"white", fontWeight:900, fontSize:15, letterSpacing:1.5, cursor:"pointer", boxShadow:"0 0 24px rgba(217,119,6,0.5), 0 4px 0 rgba(120,60,0,0.8), inset 0 1px 0 rgba(255,220,100,0.3)", transition:"all 0.15s" }}>
+                    KÍCH HOẠT
+                  </button>
+                  <div style={{ color:"rgba(255,255,255,0.25)", fontSize:11, textAlign:"center" }}>Tài khoản bị khóa đều là những tài khoản<br/>có hành vi gian lận, được kiểm duyệt qua nhiều cấp</div>
+                </div>
+              )}
+
+              {/* ── LỊCH SỬ CƯỢC ── */}
+              {settingsTab === "lichsu" && (
+                <div style={{ padding:"12px", minHeight:260 }}>
+                  {betHistory.isLoading ? (
+                    <div style={{ textAlign:"center", padding:"50px 0", color:"rgba(200,160,80,0.5)", fontSize:14 }}>Đang tải...</div>
+                  ) : !betHistory.data?.length ? (
+                    <div style={{ textAlign:"center", padding:"50px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:12 }}>
+                      <div style={{ fontSize:44, opacity:0.5 }}>🎲</div>
+                      <div style={{ color:"rgba(200,160,80,0.5)", fontSize:13, fontWeight:600 }}>Chưa có lịch sử cược</div>
+                    </div>
+                  ) : (
+                    <div style={{ display:"flex", flexDirection:"column", gap:8, maxHeight:340, overflowY:"auto" }}>
+                      {betHistory.data.map((b: any) => (
+                        <div key={b.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"rgba(255,200,0,0.05)", border:"1px solid rgba(180,120,0,0.2)", borderRadius:10, padding:"10px 14px" }}>
+                          <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                            <span style={{ color:"rgba(255,230,180,0.9)", fontSize:13, fontWeight:700 }}>{b.choice === "tai" ? "🎯 TÀI" : "🎲 XỈU"}</span>
+                            <span style={{ color:"rgba(150,120,70,0.7)", fontSize:11 }}>{new Date(b.createdAt).toLocaleString("vi-VN")}</span>
+                          </div>
+                          <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
+                            <span style={{ color:"rgba(200,160,80,0.7)", fontSize:12 }}>Cược: {b.amount?.toLocaleString("vi-VN")}đ</span>
+                            <span style={{ color: b.won ? "#4ade80" : "#f87171", fontWeight:900, fontSize:13 }}>{b.won ? `+${b.payout?.toLocaleString("vi-VN")}đ` : `-${b.amount?.toLocaleString("vi-VN")}đ`}</span>
                           </div>
                         </div>
                       ))}
                     </div>
-                  );
-                })()}
-
-                <div style={{ textAlign:"center", color:"rgba(255,255,255,0.22)", fontSize:11, marginTop:2 }}>Version 1.0.0</div>
-
-                {/* Change password */}
-                <button onClick={() => { setSettingsView("password"); setPwError(""); setPwSuccess(false); }}
-                  style={{ background:"rgba(180,30,0,0.12)", border:"1px solid rgba(200,40,0,0.3)", borderRadius:12, padding:"12px 16px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between", transition:"all 0.15s" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                    <span style={{ fontSize:18 }}>🔑</span>
-                    <span style={{ color:"white", fontWeight:700, fontSize:13 }}>Đổi Mật Khẩu</span>
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-
-                {/* Logout */}
-                <button onClick={() => { closeSettings(); handleLogout(); }}
-                  style={{ background:"rgba(220,38,38,0.1)", border:"1px solid rgba(220,38,38,0.3)", borderRadius:12, padding:"12px 16px", cursor:"pointer", display:"flex", alignItems:"center", gap:10, width:"100%" }}>
-                  <span style={{ fontSize:18 }}>🚪</span>
-                  <span style={{ color:"#f87171", fontWeight:700, fontSize:13 }}>Đăng Xuất</span>
-                </button>
-
-              </div>
-            ) : (
-              /* ── Change Password View ── */
-              <div style={{ padding:"16px 20px", display:"flex", flexDirection:"column", gap:12 }}>
-                {pwSuccess ? (
-                  <div style={{ textAlign:"center", padding:"30px 0" }}>
-                    <div style={{ fontSize:48, marginBottom:12 }}>✅</div>
-                    <div style={{ color:"#4ade80", fontWeight:900, fontSize:16, marginBottom:6 }}>Đổi mật khẩu thành công!</div>
-                    <div style={{ color:"#64748b", fontSize:12 }}>Mật khẩu đã được cập nhật</div>
-                    <button onClick={() => { setSettingsView("main"); setPwSuccess(false); }}
-                      style={{ marginTop:18, padding:"10px 28px", borderRadius:10, background:"linear-gradient(135deg,#6366f1,#4f46e5)", border:"none", color:"white", fontWeight:800, fontSize:13, cursor:"pointer" }}>
-                      Xong
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <p style={{ color:"#64748b", fontSize:12, margin:"0 0 4px" }}>Nhập mật khẩu cũ và mật khẩu mới để thay đổi.</p>
-                    {[
-                      { label:"Mật khẩu cũ", value:oldPw, setter:setOldPw },
-                      { label:"Mật khẩu mới",value:newPw, setter:setNewPw },
-                      { label:"Xác nhận mật khẩu mới", value:confirmPw, setter:setConfirmPw },
-                    ].map(({ label, value, setter }) => (
-                      <div key={label}>
-                        <label style={{ color:"#94a3b8", fontSize:11, fontWeight:700, display:"block", marginBottom:5 }}>{label}</label>
-                        <input type="password" value={value} onChange={e => { setter(e.target.value); setPwError(""); }}
-                          placeholder="••••••••"
-                          style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:9, padding:"10px 14px", color:"white", fontSize:14, outline:"none" }} />
-                      </div>
-                    ))}
-                    {pwError && (
-                      <div style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:8, padding:"8px 12px", color:"#fca5a5", fontSize:12, fontWeight:600 }}>⚠️ {pwError}</div>
-                    )}
-                    <button onClick={handleChangePw} disabled={pwLoading || !oldPw || !newPw || !confirmPw}
-                      style={{ marginTop:4, padding:"13px", borderRadius:11, background: (!oldPw||!newPw||!confirmPw||pwLoading) ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg,#6366f1,#4f46e5)", color:"white", fontWeight:900, fontSize:14, letterSpacing:0.5, border:"1px solid rgba(99,102,241,0.4)", cursor: (!oldPw||!newPw||!confirmPw||pwLoading) ? "not-allowed" : "pointer", transition:"all 0.2s", boxShadow: (!oldPw||!newPw||!confirmPw||pwLoading) ? "none" : "0 0 20px rgba(99,102,241,0.5)" }}>
-                      {pwLoading ? "Đang xử lý..." : "🔐 XÁC NHẬN ĐỔI MẬT KHẨU"}
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1374,26 +1469,36 @@ export default function Game() {
                     border:`3px solid ${vip.ring}`,
                     boxShadow:`0 0 0 2px rgba(0,0,0,0.7), 0 0 40px ${vip.glow}, 0 0 80px rgba(180,80,0,0.3)`,
                     overflow:"hidden",
-                    background:"radial-gradient(circle at 35% 30%,#6b0000,#0d0000)",
+                    background: selectedPreset
+                      ? PRESET_AVATARS.find(a => a.id === selectedPreset)?.bg ?? "radial-gradient(circle at 35% 30%,#6b0000,#0d0000)"
+                      : "radial-gradient(circle at 35% 30%,#6b0000,#0d0000)",
                     display:"flex", alignItems:"center", justifyContent:"center",
                   }}>
                     {avatar
                       ? <img src={avatar} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-                      : <span style={{ color:"#ffd700", fontWeight:900, fontSize:"clamp(36px,5vw,52px)", fontFamily:"serif", textShadow:"0 0 20px #ffd700" }}>H</span>
+                      : selectedPreset
+                        ? (() => { const p = PRESET_AVATARS.find(a => a.id === selectedPreset); return p ? (
+                            <>
+                              {/* Shine */}
+                              <div style={{ position:"absolute", top:"10%", left:"15%", width:"35%", height:"20%", borderRadius:"50%", background:"rgba(255,255,255,0.2)", transform:"rotate(-20deg)", pointerEvents:"none" }} />
+                              <span style={{ color: p.glow, fontWeight:900, fontSize:"clamp(36px,5vw,54px)", fontFamily:"serif", textShadow:`0 0 20px ${p.glow}, 0 0 40px ${p.glow}`, lineHeight:1, zIndex:1 }}>{p.char}</span>
+                            </>
+                          ) : null; })()
+                        : <span style={{ color:"#ffd700", fontWeight:900, fontSize:"clamp(36px,5vw,52px)", fontFamily:"serif", textShadow:"0 0 20px #ffd700" }}>{(user?.username?.[0] ?? "H").toUpperCase()}</span>
                     }
                   </div>
-                  {/* Camera overlay */}
+                  {/* Camera overlay — opens avatar picker */}
                   <div
-                    onClick={() => document.getElementById("avatar-upload")?.click()}
+                    onClick={() => setAvatarPickerOpen(true)}
                     style={{ position:"absolute", bottom:4, right:4, width:30, height:30, borderRadius:"50%", background:"rgba(0,0,0,0.85)", border:"2px solid rgba(200,150,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:"0 0 8px rgba(0,0,0,0.8)" }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,200,80,0.9)" strokeWidth="2" strokeLinecap="round">
                       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>
                     </svg>
                   </div>
                 </div>
-                {/* ĐỔI ẢNH button */}
+                {/* ĐỔI ẢNH button — opens avatar picker */}
                 <button
-                  onClick={() => document.getElementById("avatar-upload")?.click()}
+                  onClick={() => setAvatarPickerOpen(true)}
                   style={{
                     padding:"7px 18px", borderRadius:8, width:"100%",
                     background:"linear-gradient(135deg,rgba(140,30,0,0.6),rgba(80,10,0,0.7))",
@@ -1528,6 +1633,80 @@ export default function Game() {
               >LIÊN KẾT</button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ── Avatar Picker Modal ── */}
+      {avatarPickerOpen && (
+        <div style={{ position:"fixed", inset:0, zIndex:10000, background:"rgba(0,0,0,0.88)", backdropFilter:"blur(12px)", display:"flex", alignItems:"center", justifyContent:"center" }}
+          onClick={() => setAvatarPickerOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width:"clamp(340px,92vw,520px)",
+            background:"linear-gradient(160deg,#1a0d00,#0f0800,#1a0d00)",
+            border:"2px solid rgba(180,120,0,0.6)",
+            borderRadius:20,
+            boxShadow:"0 0 0 1px rgba(255,200,0,0.08), 0 40px 100px rgba(0,0,0,0.98), 0 0 60px rgba(180,120,0,0.25)",
+            overflow:"hidden",
+          }}>
+            {/* Header */}
+            <div style={{ position:"relative", padding:"16px 20px", background:"linear-gradient(135deg,rgba(180,120,0,0.3),rgba(100,60,0,0.2))", borderBottom:"1.5px solid rgba(180,120,0,0.35)", textAlign:"center" }}>
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(255,200,0,0.8),rgba(255,160,0,0.9),rgba(255,200,0,0.8),transparent)" }} />
+              <div style={{ color:"#f5d060", fontWeight:900, fontSize:16, letterSpacing:2, textShadow:"0 0 20px rgba(255,200,0,0.5)" }}>CHỌN ẢNH ĐẠI DIỆN</div>
+              <div style={{ color:"rgba(200,160,80,0.5)", fontSize:11, marginTop:3, letterSpacing:0.5 }}>Chọn avatar có sẵn hoặc tải ảnh lên</div>
+              <button onClick={() => setAvatarPickerOpen(false)} style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"linear-gradient(135deg,#7f1d1d,#450a0a)", border:"1.5px solid rgba(239,68,68,0.5)", borderRadius:"50%", width:30, height:30, color:"#fff", fontWeight:900, fontSize:18, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
+            </div>
+
+            {/* Grid */}
+            <div style={{ padding:"16px", maxHeight:"65vh", overflowY:"auto" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10 }}>
+                {PRESET_AVATARS.map(p => {
+                  const active = selectedPreset === p.id && !avatar;
+                  return (
+                    <div key={p.id} onClick={() => {
+                      setSelectedPreset(p.id);
+                      setAvatar(null);
+                      if (user?.id) {
+                        localStorage.setItem(`preset_${user.id}`, String(p.id));
+                        localStorage.removeItem(`avatar_${user.id}`);
+                      }
+                      setAvatarPickerOpen(false);
+                    }} style={{
+                      position:"relative", cursor:"pointer",
+                      borderRadius:14,
+                      border: active ? "2.5px solid #f5d060" : "2px solid rgba(180,120,0,0.2)",
+                      boxShadow: active ? "0 0 16px rgba(245,208,96,0.6), inset 0 0 8px rgba(180,120,0,0.2)" : "none",
+                      background: p.bg,
+                      aspectRatio:"1",
+                      display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
+                      overflow:"hidden",
+                      transition:"all 0.15s",
+                    }}>
+                      {/* Shine */}
+                      <div style={{ position:"absolute", top:"8%", left:"12%", width:"35%", height:"22%", borderRadius:"50%", background:"rgba(255,255,255,0.2)", transform:"rotate(-25deg)", pointerEvents:"none" }} />
+                      <span style={{ color: p.glow, fontWeight:900, fontSize:"clamp(22px,3vw,30px)", fontFamily:"serif", textShadow:`0 0 12px ${p.glow}`, lineHeight:1, zIndex:1 }}>{p.char}</span>
+                      {active && (
+                        <div style={{ position:"absolute", top:4, right:4, width:16, height:16, borderRadius:"50%", background:"#f5d060", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f0800" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Upload custom */}
+              <div style={{ marginTop:14, borderTop:"1px solid rgba(180,120,0,0.2)", paddingTop:14, display:"flex", gap:10 }}>
+                <button onClick={() => { document.getElementById("avatar-upload")?.click(); setAvatarPickerOpen(false); }} style={{
+                  flex:1, padding:"12px", borderRadius:12, cursor:"pointer",
+                  background:"rgba(255,200,0,0.06)", border:"1.5px dashed rgba(180,120,0,0.4)",
+                  color:"rgba(200,160,80,0.8)", fontWeight:700, fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Tải ảnh lên
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
