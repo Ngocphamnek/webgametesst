@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { useAdminListUsers, useAdminAdjustBalance, useAdminResetPassword, useAdminDeleteUser } from "@workspace/api-client-react";
+import { useAdminListUsers, useAdminAdjustBalance, useAdminResetPassword, useAdminDeleteUser, useGetMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getAdminListUsersQueryKey } from "@workspace/api-client-react";
 
 export default function AdminPage() {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const [, setLocation] = useLocation();
   const qc = useQueryClient();
 
@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const reqOptions = { request: { headers: { Authorization: `Bearer ${token}` } } };
+  const { data: user } = useGetMe(reqOptions);
 
   const { data: users = [], isLoading } = useAdminListUsers(reqOptions);
   const adjustMut = useAdminAdjustBalance({ mutation: {

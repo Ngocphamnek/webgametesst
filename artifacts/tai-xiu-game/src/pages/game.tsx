@@ -3,6 +3,7 @@ import { useGetMe, useGetBalance } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { DepositModal } from "@/components/deposit-modal";
+import { BubbleMiniGame } from "@/components/bubble-mini-game";
 import { useToast } from "@/hooks/use-toast";
 const topNavImg = "/top-nav.png";
 const bottomBarImg = "/bottom-bar.png";
@@ -425,6 +426,7 @@ export default function Game() {
   const [missionsOpen, setMissionsOpen] = useState(false);
   const [missionTab, setMissionTab]     = useState<"daily"|"newbie">("daily");
   const [gameWheelOpen, setGameWheelOpen] = useState(false);
+  const [bubbleOpen, setBubbleOpen]       = useState(false);
   /* Settings toggles (KCLUB style) */
   const [autoReady, setAutoReady]   = useState(false);
   const [effects, setEffects]       = useState(true);
@@ -1531,6 +1533,115 @@ export default function Game() {
       )}
 
       <DepositModal open={depositOpen} onOpenChange={setDepositOpen} />
+
+      {/* ── Floating Bubble Mini Game Button ── */}
+      {!bubbleOpen && (
+        <button
+          onClick={() => setBubbleOpen(true)}
+          style={{
+            position: "fixed",
+            right: "clamp(10px,2vw,20px)",
+            bottom: "clamp(80px,10vh,120px)",
+            width: "clamp(52px,6vw,68px)",
+            height: "clamp(52px,6vw,68px)",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg,#7c3aed,#4f46e5,#db2777)",
+            border: "2.5px solid rgba(255,255,255,0.35)",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            zIndex: 9000,
+            boxShadow: "0 0 24px rgba(124,58,237,0.7), 0 0 50px rgba(124,58,237,0.3), 0 4px 20px rgba(0,0,0,0.6)",
+            animation: "bubbleFloat 2.5s ease-in-out infinite",
+            outline: "none",
+          }}
+        >
+          <style>{`
+            @keyframes bubbleFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-8px) scale(1.04)} }
+            @keyframes bubblePop { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+          `}</style>
+          <span style={{ fontSize: "clamp(20px,2.5vw,28px)", lineHeight: 1 }}>🫧</span>
+          <span style={{ color: "#fff", fontSize: "clamp(7px,0.75vw,9px)", fontWeight: 900, letterSpacing: 0.5, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>BẮN BÃO</span>
+        </button>
+      )}
+
+      {/* ── Bubble Mini Game Panel ── */}
+      {bubbleOpen && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9500,
+          background: "rgba(0,0,0,0.92)",
+          backdropFilter: "blur(10px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          {/* Title bar */}
+          <div style={{
+            width: "100%",
+            maxWidth: 620,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 16px 12px",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 26 }}>🫧</span>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: 1 }}>BẮN BÃO THẦN TÀI</div>
+                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Bắn bong bóng nhận thưởng!</div>
+              </div>
+            </div>
+            <button onClick={() => setBubbleOpen(false)} style={{
+              background: "rgba(255,255,255,0.1)",
+              border: "1.5px solid rgba(255,255,255,0.2)",
+              borderRadius: "50%",
+              width: 36, height: 36,
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: 18,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>✕</button>
+          </div>
+          {/* Game area */}
+          <div style={{
+            width: "min(620px,96vw)",
+            height: "min(440px,70vh)",
+            background: "linear-gradient(180deg,#0d0020 0%,#1a0038 40%,#0d001a 100%)",
+            borderRadius: 20,
+            border: "2px solid rgba(124,58,237,0.5)",
+            boxShadow: "0 0 60px rgba(124,58,237,0.3), inset 0 0 80px rgba(0,0,0,0.5)",
+            overflow: "hidden",
+            position: "relative",
+          }}>
+            {/* Star particles background */}
+            <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+              {[...Array(20)].map((_, i) => (
+                <div key={i} style={{
+                  position: "absolute",
+                  width: 2, height: 2,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.4)",
+                  left: `${(i * 17 + 3) % 100}%`,
+                  top: `${(i * 23 + 7) % 100}%`,
+                  boxShadow: "0 0 4px rgba(255,255,255,0.3)",
+                }} />
+              ))}
+            </div>
+            <BubbleMiniGame onEarn={(amount) => {
+              toast({ title: `+${amount.toLocaleString("vi-VN")}đ`, description: "Bắn bong bóng thắng!", duration: 1500 });
+            }} />
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 10 }}>
+            Mini game vui — điểm thưởng được tích lũy trong phiên
+          </div>
+        </div>
+      )}
 
       </div>{/* ── end rotated game container ── */}
     </>

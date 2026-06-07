@@ -8,4 +8,5 @@
 
 export interface BalanceResponse {
   balance: number;
+  safeBalance?: number;
 }

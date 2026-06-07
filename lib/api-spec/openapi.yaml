@@ -101,6 +101,48 @@ paths:
               schema:
                 $ref: "#/components/schemas/BalanceResponse"
 
+  /game/vault/deposit:
+    post:
+      operationId: vaultDeposit
+      tags: [game]
+      summary: Transfer from balance to vault
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VaultInput"
+      responses:
+        "200":
+          description: Transferred to vault
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultResponse"
+
+  /game/vault/withdraw:
+    post:
+      operationId: vaultWithdraw
+      tags: [game]
+      summary: Transfer from vault to balance
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VaultInput"
+      responses:
+        "200":
+          description: Withdrawn from vault
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultResponse"
+
   /game/deposit:
     post:
       operationId: deposit
@@ -338,6 +380,25 @@ components:
       required: [balance]
       properties:
         balance:
+          type: number
+        safeBalance:
+          type: number
+
+    VaultInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 1000
+
+    VaultResponse:
+      type: object
+      required: [balance, safeBalance]
+      properties:
+        balance:
+          type: number
+        safeBalance:
           type: number
 
     DepositInput:

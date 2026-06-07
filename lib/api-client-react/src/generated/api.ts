@@ -33,7 +33,9 @@ import type {
   HealthStatus,
   LeaderboardEntry,
   ResetPasswordInput,
-  User
+  User,
+  VaultInput,
+  VaultResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -420,6 +422,148 @@ export function useGetBalance<TData = Awaited<ReturnType<typeof getBalance>>, TE
 
 
 
+
+export const getVaultDepositUrl = () => {
+
+
+
+
+  return `/api/game/vault/deposit`
+}
+
+/**
+ * @summary Transfer from balance to vault
+ */
+export const vaultDeposit = async (vaultInput: VaultInput, options?: RequestInit): Promise<VaultResponse> => {
+
+  return customFetch<VaultResponse>(getVaultDepositUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      vaultInput,)
+  }
+);}
+
+
+
+
+export const getVaultDepositMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vaultDeposit>>, TError,{data: BodyType<VaultInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof vaultDeposit>>, TError,{data: BodyType<VaultInput>}, TContext> => {
+
+const mutationKey = ['vaultDeposit'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof vaultDeposit>>, {data: BodyType<VaultInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  vaultDeposit(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VaultDepositMutationResult = NonNullable<Awaited<ReturnType<typeof vaultDeposit>>>
+    export type VaultDepositMutationBody = BodyType<VaultInput>
+    export type VaultDepositMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Transfer from balance to vault
+ */
+export const useVaultDeposit = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vaultDeposit>>, TError,{data: BodyType<VaultInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof vaultDeposit>>,
+        TError,
+        {data: BodyType<VaultInput>},
+        TContext
+      > => {
+      return useMutation(getVaultDepositMutationOptions(options));
+    }
+
+export const getVaultWithdrawUrl = () => {
+
+
+
+
+  return `/api/game/vault/withdraw`
+}
+
+/**
+ * @summary Transfer from vault to balance
+ */
+export const vaultWithdraw = async (vaultInput: VaultInput, options?: RequestInit): Promise<VaultResponse> => {
+
+  return customFetch<VaultResponse>(getVaultWithdrawUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      vaultInput,)
+  }
+);}
+
+
+
+
+export const getVaultWithdrawMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vaultWithdraw>>, TError,{data: BodyType<VaultInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof vaultWithdraw>>, TError,{data: BodyType<VaultInput>}, TContext> => {
+
+const mutationKey = ['vaultWithdraw'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof vaultWithdraw>>, {data: BodyType<VaultInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  vaultWithdraw(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VaultWithdrawMutationResult = NonNullable<Awaited<ReturnType<typeof vaultWithdraw>>>
+    export type VaultWithdrawMutationBody = BodyType<VaultInput>
+    export type VaultWithdrawMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Transfer from vault to balance
+ */
+export const useVaultWithdraw = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vaultWithdraw>>, TError,{data: BodyType<VaultInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof vaultWithdraw>>,
+        TError,
+        {data: BodyType<VaultInput>},
+        TContext
+      > => {
+      return useMutation(getVaultWithdrawMutationOptions(options));
+    }
 
 export const getDepositUrl = () => {
 

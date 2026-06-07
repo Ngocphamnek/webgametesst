@@ -33,6 +33,17 @@ export interface AuthResponse {
 
 export interface BalanceResponse {
   balance: number;
+  safeBalance?: number;
+}
+
+export interface VaultInput {
+  /** @minimum 1000 */
+  amount: number;
+}
+
+export interface VaultResponse {
+  balance: number;
+  safeBalance: number;
 }
 
 export interface DepositInput {

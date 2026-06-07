@@ -20,3 +20,5 @@ export * from './healthStatus';
 export * from './leaderboardEntry';
 export * from './resetPasswordInput';
 export * from './user';
+export * from './vaultInput';
+export * from './vaultResponse';

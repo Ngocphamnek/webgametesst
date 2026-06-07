@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useDeposit, getGetBalanceQueryKey, useGetBetHistory } from "@workspace/api-client-react";
+import { useDeposit, useVaultDeposit, useVaultWithdraw, useGetMe, getGetBalanceQueryKey, useGetBetHistory } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -372,11 +372,17 @@ export function DepositModal({ open, onOpenChange }: { open: boolean; onOpenChan
   /* Feedback */
   const [msg, setMsg]         = useState<{text:string;ok:boolean}|null>(null);
 
-  const { token, user }  = useAuth();
-  const deposit    = useDeposit();
+  const { token }    = useAuth();
+  const deposit     = useDeposit();
+  const vaultDep    = useVaultDeposit();
+  const vaultWith   = useVaultWithdraw();
   const queryClient = useQueryClient();
-  const reqOpts    = { request: { headers: { Authorization:`Bearer ${token}` } } };
-  const history    = useGetBetHistory(reqOpts);
+  const reqOpts     = { request: { headers: { Authorization:`Bearer ${token}` } } };
+  const history     = useGetBetHistory(reqOpts);
+  const { data: user } = useGetMe(reqOpts);
+  const balanceQuery = useQueryClient().getQueryData<{ balance: number; safeBalance?: number }>(getGetBalanceQueryKey());
+  const currentBalance   = balanceQuery?.balance   ?? 0;
+  const currentSafe      = balanceQuery?.safeBalance ?? 0;
 
   if (!open) return null;
 
@@ -588,7 +594,7 @@ export function DepositModal({ open, onOpenChange }: { open: boolean; onOpenChan
 
           {/* ═══════════ RÚT ═══════════ */}
           {tab === "rut" && <>
-            <Sidebar methods={RUT_METHODS} active={rutMethod} onSelect={setRutMethod} />
+            <Sidebar methods={RUT_METHODS} active={rutMethod} onSelect={(id) => setRutMethod(id as RutMethod)} />
 
             {/* NGÂN HÀNG */}
             {rutMethod === "ngan-hang" && (
@@ -676,33 +682,59 @@ export function DepositModal({ open, onOpenChange }: { open: boolean; onOpenChan
           {tab === "ket-sat" && (
             <div style={{ flex:1, display:"flex" }}>
               {/* Left — safe info */}
-              <div style={{ width:190, borderRight:"1.5px solid rgba(160,20,0,0.35)", padding:"20px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:12 }}>
-                <div style={{ fontSize:60 }}>🗄</div>
+              <div style={{ width:200, borderRight:"1.5px solid rgba(160,20,0,0.35)", padding:"20px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
+                <div style={{ fontSize:54 }}>🗄</div>
                 <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>{user?.displayName ?? user?.username}</div>
-                <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-                  {[{ icon:"💰", label:"Số dư" },{ icon:"🗄", label:"Két sắt" }].map(r => (
-                    <div key={r.label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"rgba(0,0,0,0.3)", borderRadius:8, padding:"8px 12px", border:"1px solid rgba(160,20,0,0.3)" }}>
-                      <span style={{ fontSize:16 }}>{r.icon}</span>
-                      <span style={{ color:"rgba(255,255,255,0.6)", fontSize:12 }}>{r.label}</span>
-                      <span style={{ color:"#ffd700", fontWeight:700, fontSize:13 }}>0</span>
-                      <div style={{ width:20, height:20, borderRadius:"50%", background:"linear-gradient(135deg,#16a34a,#15803d)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:900, fontSize:11, cursor:"pointer" }}>+</div>
-                    </div>
-                  ))}
+
+                {/* Số dư row */}
+                <div style={{ width:"100%", background:"rgba(0,0,0,0.35)", borderRadius:10, padding:"10px 12px", border:"1px solid rgba(160,20,0,0.3)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                    <span style={{ fontSize:18 }}>💰</span>
+                    <span style={{ color:"rgba(255,180,120,0.8)", fontSize:12, fontWeight:600 }}>Số dư</span>
+                  </div>
+                  <div style={{ color:"#ffd700", fontWeight:900, fontSize:16, fontFamily:"monospace", textAlign:"right" }}>
+                    {currentBalance.toLocaleString("vi-VN")}đ
+                  </div>
+                </div>
+
+                {/* Két sắt row */}
+                <div style={{ width:"100%", background:"rgba(0,0,0,0.35)", borderRadius:10, padding:"10px 12px", border:"1px solid rgba(22,163,74,0.4)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                    <span style={{ fontSize:18 }}>🗄</span>
+                    <span style={{ color:"rgba(134,239,172,0.8)", fontSize:12, fontWeight:600 }}>Két sắt</span>
+                  </div>
+                  <div style={{ color:"#4ade80", fontWeight:900, fontSize:16, fontFamily:"monospace", textAlign:"right" }}>
+                    {currentSafe.toLocaleString("vi-VN")}đ
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div style={{ color:"rgba(255,255,255,0.3)", fontSize:11, textAlign:"center", lineHeight:1.5 }}>
+                  Tiền trong két sắt<br/>được bảo vệ an toàn
                 </div>
               </div>
+
               {/* Right — action */}
               <div style={{ flex:1, padding:"18px 22px", display:"flex", flexDirection:"column", gap:14 }}>
                 {/* Toggle */}
                 <div style={{ display:"flex", gap:0, background:"rgba(0,0,0,0.3)", borderRadius:10, padding:4, border:"1px solid rgba(160,20,0,0.3)", alignSelf:"flex-start" }}>
                   {(["gui","rut"] as const).map(m => (
-                    <button key={m} onClick={() => setKsMode(m)} style={{
-                      padding:"8px 24px", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:700,
+                    <button key={m} onClick={() => { setKsMode(m); setKsAmt(""); }} style={{
+                      padding:"9px 28px", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:700,
                       background: ksMode===m ? "linear-gradient(135deg,#c41c00,#7f0000)" : "transparent",
                       color: ksMode===m ? "#fff" : "rgba(200,80,60,0.6)",
                       transition:"all 0.15s",
-                    }}>{m === "gui" ? "GỬI TIỀN" : "RÚT TIỀN"}</button>
+                    }}>{m === "gui" ? "📥 GỬI VÀO KÉT" : "📤 RÚT TỪ KÉT"}</button>
                   ))}
                 </div>
+
+                <div style={{ color:"rgba(255,255,255,0.45)", fontSize:12 }}>
+                  {ksMode === "gui"
+                    ? `Số dư khả dụng: ${currentBalance.toLocaleString("vi-VN")}đ`
+                    : `Trong két sắt: ${currentSafe.toLocaleString("vi-VN")}đ`
+                  }
+                </div>
+
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                   <AmountInput value={ksAmt} onChange={setKsAmt} />
                 </div>
@@ -710,16 +742,41 @@ export function DepositModal({ open, onOpenChange }: { open: boolean; onOpenChan
                   {KS_QUICK.map(a => (
                     <button key={a} onClick={() => setKsAmt(String(a))} style={qBtnStyle(parseInt(ksAmt||"0",10)===a)}>{fmtShort(a)}</button>
                   ))}
-                  <button onClick={() => setKsAmt("ALL")} style={qBtnStyle(ksAmt==="ALL")}>ALL</button>
+                  <button onClick={() => setKsAmt(ksMode==="gui" ? String(Math.floor(currentBalance)) : String(Math.floor(currentSafe)))} style={qBtnStyle(false)}>ALL</button>
                 </div>
+
                 {msg && <p style={{ color:msg.ok?"#4ade80":"#f87171", fontSize:12, margin:0, textAlign:"center" }}>{msg.text}</p>}
-                <ActionBtn label={ksMode === "gui" ? "GỬI TIỀN" : "RÚT TIỀN"} color="red"
+
+                <ActionBtn
+                  label={vaultDep.isPending || vaultWith.isPending ? "Đang xử lý..." : ksMode === "gui" ? "📥 GỬI VÀO KÉT SẮT" : "📤 RÚT RA NGOÀI"}
+                  color="red"
                   onClick={() => {
-                    const n = parseInt(ksAmt,10);
-                    if(ksMode==="gui" && n>=10000) { doDeposit(n); }
-                    else showMsg("Vui lòng liên hệ admin!", false);
+                    const n = parseInt(ksAmt, 10);
+                    if (!n || n < 1000) { showMsg("Tối thiểu 1,000đ", false); return; }
+                    if (ksMode === "gui") {
+                      if (n > currentBalance) { showMsg("Số dư không đủ!", false); return; }
+                      vaultDep.mutate({ data: { amount: n } }, {
+                        onSuccess: () => {
+                          showMsg(`✅ Đã gửi ${fmtVnd(n)} vào két sắt!`, true);
+                          queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
+                          setKsAmt("");
+                        },
+                        onError: (e: any) => showMsg(e?.response?.data?.error || "Thất bại, thử lại!", false),
+                      });
+                    } else {
+                      if (n > currentSafe) { showMsg("Két sắt không đủ tiền!", false); return; }
+                      vaultWith.mutate({ data: { amount: n } }, {
+                        onSuccess: () => {
+                          showMsg(`✅ Đã rút ${fmtVnd(n)} từ két sắt!`, true);
+                          queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
+                          setKsAmt("");
+                        },
+                        onError: (e: any) => showMsg(e?.response?.data?.error || "Thất bại, thử lại!", false),
+                      });
+                    }
                   }}
-                  disabled={!ksAmt || ksAmt==="ALL" || parseInt(ksAmt,10)<10000 || deposit.isPending} />
+                  disabled={!ksAmt || parseInt(ksAmt,10) < 1000 || vaultDep.isPending || vaultWith.isPending}
+                />
               </div>
             </div>
           )}

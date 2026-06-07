@@ -24,11 +24,51 @@ router.get("/game/balance", async (req, res) => {
   const auth = requireAuth(req, res);
   if (!auth) return;
 
-  const [user] = await db.select({ balance: usersTable.balance })
+  const [user] = await db.select({ balance: usersTable.balance, safeBalance: usersTable.safeBalance })
     .from(usersTable).where(eq(usersTable.id, auth.userId)).limit(1);
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  return res.json({ balance: user.balance });
+  return res.json({ balance: user.balance, safeBalance: user.safeBalance ?? 0 });
+});
+
+router.post("/game/vault/deposit", async (req, res) => {
+  const auth = requireAuth(req, res);
+  if (!auth) return;
+
+  const amount = Number(req.body?.amount);
+  if (!Number.isFinite(amount) || amount < 1000) {
+    return res.status(400).json({ error: "Số tiền tối thiểu 1,000" });
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, auth.userId)).limit(1);
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (user.balance < amount) return res.status(400).json({ error: "Số dư không đủ" });
+
+  const newBalance = user.balance - amount;
+  const newSafe = (user.safeBalance ?? 0) + amount;
+  await db.update(usersTable).set({ balance: newBalance, safeBalance: newSafe }).where(eq(usersTable.id, auth.userId));
+
+  return res.json({ balance: newBalance, safeBalance: newSafe });
+});
+
+router.post("/game/vault/withdraw", async (req, res) => {
+  const auth = requireAuth(req, res);
+  if (!auth) return;
+
+  const amount = Number(req.body?.amount);
+  if (!Number.isFinite(amount) || amount < 1000) {
+    return res.status(400).json({ error: "Số tiền tối thiểu 1,000" });
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, auth.userId)).limit(1);
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if ((user.safeBalance ?? 0) < amount) return res.status(400).json({ error: "Két sắt không đủ tiền" });
+
+  const newBalance = user.balance + amount;
+  const newSafe = (user.safeBalance ?? 0) - amount;
+  await db.update(usersTable).set({ balance: newBalance, safeBalance: newSafe }).where(eq(usersTable.id, auth.userId));
+
+  return res.json({ balance: newBalance, safeBalance: newSafe });
 });
 
 router.post("/game/deposit", async (req, res) => {

@@ -75,7 +75,42 @@ export const GetMeResponse = zod.object({
  * @summary Get user balance
  */
 export const GetBalanceResponse = zod.object({
-  "balance": zod.number()
+  "balance": zod.number(),
+  "safeBalance": zod.number().optional()
+})
+
+
+/**
+ * @summary Transfer from balance to vault
+ */
+export const vaultDepositBodyAmountMin = 1000;
+
+
+
+export const VaultDepositBody = zod.object({
+  "amount": zod.number().min(vaultDepositBodyAmountMin)
+})
+
+export const VaultDepositResponse = zod.object({
+  "balance": zod.number(),
+  "safeBalance": zod.number()
+})
+
+
+/**
+ * @summary Transfer from vault to balance
+ */
+export const vaultWithdrawBodyAmountMin = 1000;
+
+
+
+export const VaultWithdrawBody = zod.object({
+  "amount": zod.number().min(vaultWithdrawBodyAmountMin)
+})
+
+export const VaultWithdrawResponse = zod.object({
+  "balance": zod.number(),
+  "safeBalance": zod.number()
 })
 
 
@@ -91,7 +126,8 @@ export const DepositBody = zod.object({
 })
 
 export const DepositResponse = zod.object({
-  "balance": zod.number()
+  "balance": zod.number(),
+  "safeBalance": zod.number().optional()
 })
 
 
