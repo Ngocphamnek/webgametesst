@@ -1137,21 +1137,53 @@ export default function Game() {
               {/* ── BẢO MẬT ── */}
               {settingsTab === "baomat" && (
                 <div style={{ padding:"24px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:20 }}>
-                  <div style={{ background:"linear-gradient(135deg,rgba(180,120,0,0.15),rgba(100,60,0,0.1))", border:"1.5px solid rgba(180,120,0,0.35)", borderRadius:14, padding:"14px 22px", display:"flex", alignItems:"center", gap:12, width:"100%", boxSizing:"border-box" }}>
-                    <div style={{ width:44, height:44, borderRadius:10, background:"linear-gradient(135deg,#b45309,#92400e)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>💬</div>
+                  {/* Telegram OTP badge */}
+                  <div style={{ background:"linear-gradient(135deg,rgba(3,155,229,0.18),rgba(1,87,155,0.12))", border:"1.5px solid rgba(3,155,229,0.45)", borderRadius:14, padding:"14px 22px", display:"flex", alignItems:"center", gap:12, width:"100%", boxSizing:"border-box" }}>
+                    <div style={{ width:44, height:44, borderRadius:10, background:"linear-gradient(135deg,#0288d1,#01579b)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>
+                      <svg viewBox="0 0 24 24" width="26" height="26" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </div>
                     <div>
-                      <div style={{ color:"#f5d060", fontWeight:900, fontSize:13, letterSpacing:0.5 }}>SMS OTP</div>
-                      <div style={{ color:"rgba(200,160,80,0.6)", fontSize:11, marginTop:2 }}>Xác thực 2 bước qua tin nhắn</div>
+                      <div style={{ color:"#4fc3f7", fontWeight:900, fontSize:13, letterSpacing:0.5 }}>TELEGRAM OTP</div>
+                      <div style={{ color:"rgba(100,200,255,0.6)", fontSize:11, marginTop:2 }}>Xác thực 2 bước qua Telegram</div>
                     </div>
                   </div>
-                  <div style={{ textAlign:"center", padding:"10px 0" }}>
-                    <div style={{ fontSize:52, marginBottom:12 }}>📱</div>
-                    <div style={{ color:"rgba(255,230,180,0.85)", fontWeight:700, fontSize:15, lineHeight:1.6, textAlign:"center" }}>Kích hoạt Số Điện Thoại<br/>để bảo vệ Tài Khoản của bạn!</div>
+
+                  {/* Illustration */}
+                  <div style={{ textAlign:"center", padding:"6px 0" }}>
+                    <div style={{ fontSize:52, marginBottom:10 }}>
+                      <svg viewBox="0 0 48 48" width="56" height="56" style={{ display:"inline-block" }}><circle cx="24" cy="24" r="24" fill="#0288d1"/><path d="M11.944 12A12 12 0 0 0 0 24a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 12a12 12 0 0 0-.056 0zm4.962 3.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" fill="white" transform="translate(12,12) scale(1)"/></svg>
+                    </div>
+                    <div style={{ color:"rgba(150,220,255,0.9)", fontWeight:700, fontSize:15, lineHeight:1.6, textAlign:"center" }}>
+                      Kết nối Telegram<br/>để bảo vệ Tài Khoản của bạn!
+                    </div>
+                    <div style={{ color:"rgba(100,180,220,0.55)", fontSize:11, marginTop:6, lineHeight:1.5 }}>
+                      Mỗi lần đăng nhập sẽ gửi mã OTP<br/>qua bot Telegram của bạn
+                    </div>
                   </div>
-                  <button style={{ padding:"14px 48px", borderRadius:12, background:"linear-gradient(135deg,#b45309,#d97706)", border:"1.5px solid rgba(245,158,11,0.5)", color:"white", fontWeight:900, fontSize:15, letterSpacing:1.5, cursor:"pointer", boxShadow:"0 0 24px rgba(217,119,6,0.5), 0 4px 0 rgba(120,60,0,0.8), inset 0 1px 0 rgba(255,220,100,0.3)", transition:"all 0.15s" }}>
-                    KÍCH HOẠT
+
+                  {/* Username input */}
+                  <div style={{ width:"100%", boxSizing:"border-box" }}>
+                    <label style={{ color:"rgba(100,200,255,0.7)", fontSize:11, fontWeight:700, display:"block", marginBottom:6, letterSpacing:0.5 }}>USERNAME TELEGRAM</label>
+                    <div style={{ position:"relative" }}>
+                      <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:"rgba(100,200,255,0.5)", fontSize:14, fontWeight:700, pointerEvents:"none" }}>@</span>
+                      <input
+                        placeholder="username của bạn"
+                        style={{ width:"100%", boxSizing:"border-box", background:"rgba(3,155,229,0.08)", border:"1.5px solid rgba(3,155,229,0.3)", borderRadius:10, padding:"11px 14px 11px 28px", color:"white", fontSize:13, outline:"none" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Activate button */}
+                  <button
+                    style={{ width:"100%", padding:"14px", borderRadius:12, background:"linear-gradient(135deg,#0288d1,#01579b)", border:"1.5px solid rgba(3,155,229,0.5)", color:"white", fontWeight:900, fontSize:15, letterSpacing:1.5, cursor:"pointer", boxShadow:"0 0 24px rgba(2,136,209,0.5), 0 4px 0 rgba(1,40,80,0.8), inset 0 1px 0 rgba(100,200,255,0.25)", transition:"all 0.15s", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    KÍCH HOẠT TELEGRAM OTP
                   </button>
-                  <div style={{ color:"rgba(255,255,255,0.25)", fontSize:11, textAlign:"center" }}>Tài khoản bị khóa đều là những tài khoản<br/>có hành vi gian lận, được kiểm duyệt qua nhiều cấp</div>
+
+                  <div style={{ color:"rgba(255,255,255,0.22)", fontSize:11, textAlign:"center" }}>
+                    Tài khoản bị khóa đều là những tài khoản<br/>có hành vi gian lận, được kiểm duyệt qua nhiều cấp
+                  </div>
                 </div>
               )}
 
