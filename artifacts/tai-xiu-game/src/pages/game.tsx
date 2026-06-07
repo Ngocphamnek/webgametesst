@@ -858,7 +858,7 @@ export default function Game() {
             />
             {/* Invisible click zones over each icon */}
             <div style={{ position:"absolute", inset:0, display:"flex" }}>
-              <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Sự Kiện"  onClick={() => toast({ title:"🎁 Sự Kiện", description:"Đang cập nhật sự kiện mới, vui lòng quay lại sau!" })} />
+              <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Sự Kiện"  onClick={() => setMissionsOpen(true)} />
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Nạp Tiền" onClick={() => setDepositOpen(true)} />
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Đại Lý"   onClick={() => toast({ title:"🤝 Đại Lý", description:"Liên hệ Zalo/Telegram để đăng ký làm đại lý!" })} />
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Vòng Quay" onClick={() => toast({ title:"🎡 Vòng Quay", description:"Tính năng vòng quay đang được phát triển!" })} />
