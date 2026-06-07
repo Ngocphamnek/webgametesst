@@ -114,38 +114,10 @@ const TOP_NAV = [
 ];
 
 /* ─── Preset avatar data ─────────────────────────────────────────────── */
-const PRESET_AVATARS = [
-  { id:1,  bg:"linear-gradient(135deg,#1a0a2e,#3d1a6e)", char:"侠", glow:"#7c3aed" },
-  { id:2,  bg:"linear-gradient(135deg,#1a0000,#5a0000)", char:"龙", glow:"#dc2626" },
-  { id:3,  bg:"linear-gradient(135deg,#001a14,#004a38)", char:"凤", glow:"#059669" },
-  { id:4,  bg:"linear-gradient(135deg,#1a1000,#4a2e00)", char:"将", glow:"#d97706" },
-  { id:5,  bg:"linear-gradient(135deg,#00102e,#002054)", char:"帝", glow:"#0284c7" },
-  { id:6,  bg:"linear-gradient(135deg,#2e001a,#600038)", char:"后", glow:"#db2777" },
-  { id:7,  bg:"linear-gradient(135deg,#1a1400,#3c2e00)", char:"剑", glow:"#ca8a04" },
-  { id:8,  bg:"linear-gradient(135deg,#0a002e,#200060)", char:"神", glow:"#7c3aed" },
-  { id:9,  bg:"linear-gradient(135deg,#1e0a00,#4a1a00)", char:"武", glow:"#ea580c" },
-  { id:10, bg:"linear-gradient(135deg,#001e1e,#004444)", char:"仙", glow:"#0d9488" },
-  { id:11, bg:"linear-gradient(135deg,#2e1a00,#603800)", char:"虎", glow:"#f59e0b" },
-  { id:12, bg:"linear-gradient(135deg,#001428,#00285c)", char:"鹰", glow:"#3b82f6" },
-  { id:13, bg:"linear-gradient(135deg,#2e0028,#640058)", char:"妖", glow:"#e879f9" },
-  { id:14, bg:"linear-gradient(135deg,#001400,#004000)", char:"豪", glow:"#22c55e" },
-  { id:15, bg:"linear-gradient(135deg,#2e0000,#780000)", char:"霸", glow:"#ef4444" },
-  { id:16, bg:"linear-gradient(135deg,#1e1e00,#444400)", char:"王", glow:"#eab308" },
-  { id:17, bg:"linear-gradient(135deg,#00102e,#002464)", char:"雷", glow:"#60a5fa" },
-  { id:18, bg:"linear-gradient(135deg,#2e1400,#622c00)", char:"火", glow:"#fb923c" },
-  { id:19, bg:"linear-gradient(135deg,#001428,#002c5a)", char:"冰", glow:"#67e8f9" },
-  { id:20, bg:"linear-gradient(135deg,#14001e,#300046)", char:"魔", glow:"#c084fc" },
-  { id:21, bg:"linear-gradient(135deg,#001e14,#004030)", char:"圣", glow:"#4ade80" },
-  { id:22, bg:"linear-gradient(135deg,#1e0014,#440030)", char:"天", glow:"#f472b6" },
-  { id:23, bg:"linear-gradient(135deg,#141400,#2c2c00)", char:"地", glow:"#a3e635" },
-  { id:24, bg:"linear-gradient(135deg,#0a1e28,#143c50)", char:"战", glow:"#38bdf8" },
-  { id:25, bg:"linear-gradient(135deg,#280014,#600030)", char:"狼", glow:"#f87171" },
-  { id:26, bg:"linear-gradient(135deg,#14001e,#300044)", char:"蛟", glow:"#a78bfa" },
-  { id:27, bg:"linear-gradient(135deg,#001e28,#003c50)", char:"海", glow:"#22d3ee" },
-  { id:28, bg:"linear-gradient(135deg,#1e1400,#443000)", char:"金", glow:"#fbbf24" },
-  { id:29, bg:"linear-gradient(135deg,#0e1e00,#1e3c00)", char:"玉", glow:"#86efac" },
-  { id:30, bg:"linear-gradient(135deg,#0a0a28,#181848)", char:"皇", glow:"#818cf8" },
-];
+const PRESET_AVATARS = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  url: `/avatars/av${i + 1}.png`,
+}));
 
 /* ─── Bottom-bar button styles (must be before Game component) ───────── */
 const newDockBtn: React.CSSProperties = {
@@ -1471,21 +1443,13 @@ export default function Game() {
                     border:`3px solid ${vip.ring}`,
                     boxShadow:`0 0 0 2px rgba(0,0,0,0.7), 0 0 40px ${vip.glow}, 0 0 80px rgba(180,80,0,0.3)`,
                     overflow:"hidden",
-                    background: selectedPreset
-                      ? PRESET_AVATARS.find(a => a.id === selectedPreset)?.bg ?? "radial-gradient(circle at 35% 30%,#6b0000,#0d0000)"
-                      : "radial-gradient(circle at 35% 30%,#6b0000,#0d0000)",
+                    background:"radial-gradient(circle at 35% 30%,#6b0000,#0d0000)",
                     display:"flex", alignItems:"center", justifyContent:"center",
                   }}>
                     {avatar
                       ? <img src={avatar} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
                       : selectedPreset
-                        ? (() => { const p = PRESET_AVATARS.find(a => a.id === selectedPreset); return p ? (
-                            <>
-                              {/* Shine */}
-                              <div style={{ position:"absolute", top:"10%", left:"15%", width:"35%", height:"20%", borderRadius:"50%", background:"rgba(255,255,255,0.2)", transform:"rotate(-20deg)", pointerEvents:"none" }} />
-                              <span style={{ color: p.glow, fontWeight:900, fontSize:"clamp(36px,5vw,54px)", fontFamily:"serif", textShadow:`0 0 20px ${p.glow}, 0 0 40px ${p.glow}`, lineHeight:1, zIndex:1 }}>{p.char}</span>
-                            </>
-                          ) : null; })()
+                        ? <img src={PRESET_AVATARS.find(a => a.id === selectedPreset)?.url ?? ""} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
                         : <span style={{ color:"#ffd700", fontWeight:900, fontSize:"clamp(36px,5vw,52px)", fontFamily:"serif", textShadow:"0 0 20px #ffd700" }}>{(user?.username?.[0] ?? "H").toUpperCase()}</span>
                     }
                   </div>
@@ -1655,7 +1619,7 @@ export default function Game() {
             <div style={{ position:"relative", padding:"16px 20px", background:"linear-gradient(135deg,rgba(180,120,0,0.3),rgba(100,60,0,0.2))", borderBottom:"1.5px solid rgba(180,120,0,0.35)", textAlign:"center" }}>
               <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(255,200,0,0.8),rgba(255,160,0,0.9),rgba(255,200,0,0.8),transparent)" }} />
               <div style={{ color:"#f5d060", fontWeight:900, fontSize:16, letterSpacing:2, textShadow:"0 0 20px rgba(255,200,0,0.5)" }}>CHỌN ẢNH ĐẠI DIỆN</div>
-              <div style={{ color:"rgba(200,160,80,0.5)", fontSize:11, marginTop:3, letterSpacing:0.5 }}>Chọn avatar có sẵn hoặc tải ảnh lên</div>
+              <div style={{ color:"rgba(200,160,80,0.5)", fontSize:11, marginTop:3, letterSpacing:0.5 }}>Chọn 1 trong 20 avatar có sẵn</div>
               <button onClick={() => setAvatarPickerOpen(false)} style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"linear-gradient(135deg,#7f1d1d,#450a0a)", border:"1.5px solid rgba(239,68,68,0.5)", borderRadius:"50%", width:30, height:30, color:"#fff", fontWeight:900, fontSize:18, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
             </div>
 
@@ -1677,36 +1641,25 @@ export default function Game() {
                       position:"relative", cursor:"pointer",
                       borderRadius:14,
                       border: active ? "2.5px solid #f5d060" : "2px solid rgba(180,120,0,0.2)",
-                      boxShadow: active ? "0 0 16px rgba(245,208,96,0.6), inset 0 0 8px rgba(180,120,0,0.2)" : "none",
-                      background: p.bg,
+                      boxShadow: active ? "0 0 16px rgba(245,208,96,0.6)" : "none",
                       aspectRatio:"1",
-                      display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
                       overflow:"hidden",
                       transition:"all 0.15s",
+                      background:"#1a0d00",
                     }}>
-                      {/* Shine */}
-                      <div style={{ position:"absolute", top:"8%", left:"12%", width:"35%", height:"22%", borderRadius:"50%", background:"rgba(255,255,255,0.2)", transform:"rotate(-25deg)", pointerEvents:"none" }} />
-                      <span style={{ color: p.glow, fontWeight:900, fontSize:"clamp(22px,3vw,30px)", fontFamily:"serif", textShadow:`0 0 12px ${p.glow}`, lineHeight:1, zIndex:1 }}>{p.char}</span>
+                      <img
+                        src={p.url}
+                        alt={`avatar ${p.id}`}
+                        style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}
+                      />
                       {active && (
-                        <div style={{ position:"absolute", top:4, right:4, width:16, height:16, borderRadius:"50%", background:"#f5d060", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f0800" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <div style={{ position:"absolute", top:4, right:4, width:18, height:18, borderRadius:"50%", background:"#f5d060", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0f0800" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
                       )}
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Upload custom */}
-              <div style={{ marginTop:14, borderTop:"1px solid rgba(180,120,0,0.2)", paddingTop:14, display:"flex", gap:10 }}>
-                <button onClick={() => { document.getElementById("avatar-upload")?.click(); setAvatarPickerOpen(false); }} style={{
-                  flex:1, padding:"12px", borderRadius:12, cursor:"pointer",
-                  background:"rgba(255,200,0,0.06)", border:"1.5px dashed rgba(180,120,0,0.4)",
-                  color:"rgba(200,160,80,0.8)", fontWeight:700, fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:8,
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Tải ảnh lên
-                </button>
               </div>
             </div>
           </div>
