@@ -462,6 +462,9 @@ export default function Game() {
   const [selectedPreset, setSelectedPreset]     = useState<number | null>(null);
   /* New modals */
   const [missionsOpen, setMissionsOpen] = useState(false);
+  const [giftcodeOpen, setGiftcodeOpen] = useState(false);
+  const [giftcodeVal, setGiftcodeVal]   = useState("");
+  const [giftcodeStatus, setGiftcodeStatus] = useState<"idle"|"loading"|"ok"|"err">("idle");
   const [missionTab, setMissionTab]     = useState<"daily"|"newbie">("daily");
   const [gameWheelOpen, setGameWheelOpen] = useState(false);
   /* Settings toggles (KCLUB style) */
@@ -862,7 +865,7 @@ export default function Game() {
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Nạp Tiền" onClick={() => setDepositOpen(true)} />
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Đại Lý"   onClick={() => toast({ title:"🤝 Đại Lý", description:"Liên hệ Zalo/Telegram để đăng ký làm đại lý!" })} />
               <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Vòng Quay" onClick={() => toast({ title:"🎡 Vòng Quay", description:"Tính năng vòng quay đang được phát triển!" })} />
-              <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Giftcode"  onClick={() => toast({ title:"🎀 Giftcode", description:"Nhập giftcode để nhận thưởng, tính năng sắp ra mắt!" })} />
+              <button style={{ flex:1, background:"none", border:"none", cursor:"pointer" }} title="Giftcode"  onClick={() => { setGiftcodeOpen(true); setGiftcodeVal(""); setGiftcodeStatus("idle"); }} />
             </div>
           </div>
         </div>
@@ -1705,6 +1708,92 @@ export default function Game() {
                   Tải ảnh lên
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GIFTCODE Modal ── */}
+      {giftcodeOpen && (
+        <div style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(0,0,0,0.85)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center" }}
+          onClick={() => setGiftcodeOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width:"clamp(320px,90vw,420px)",
+            background:"linear-gradient(160deg,#1a0d00,#0f0800,#1a0d00)",
+            border:"2px solid rgba(180,120,0,0.6)",
+            borderRadius:18,
+            boxShadow:"0 0 0 1px rgba(255,200,0,0.08), 0 32px 80px rgba(0,0,0,0.97), 0 0 40px rgba(180,120,0,0.2)",
+            overflow:"hidden",
+          }}>
+            {/* Header */}
+            <div style={{ position:"relative", padding:"14px 20px", background:"linear-gradient(135deg,rgba(180,120,0,0.25),rgba(100,60,0,0.2))", borderBottom:"1.5px solid rgba(180,120,0,0.35)", textAlign:"center" }}>
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(255,200,0,0.8),rgba(255,160,0,0.9),rgba(255,200,0,0.8),transparent)" }} />
+              <span style={{ fontSize:20, marginRight:8 }}>🎀</span>
+              <span style={{ color:"#f5d060", fontWeight:900, fontSize:17, letterSpacing:2, textShadow:"0 0 20px rgba(255,200,0,0.5)" }}>NHẬP GIFTCODE</span>
+              <button onClick={() => setGiftcodeOpen(false)} style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"linear-gradient(135deg,#7f1d1d,#450a0a)", border:"1.5px solid rgba(239,68,68,0.5)", borderRadius:"50%", width:28, height:28, color:"#fff", fontWeight:900, fontSize:16, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding:"28px 24px", display:"flex", flexDirection:"column", alignItems:"center", gap:20 }}>
+              {/* Decoration */}
+              <div style={{ fontSize:52, lineHeight:1 }}>🎁</div>
+              <div style={{ color:"rgba(255,230,180,0.8)", fontSize:13, textAlign:"center", lineHeight:1.6 }}>
+                Nhập mã Giftcode để nhận thưởng<br/>
+                <span style={{ color:"rgba(200,160,80,0.55)", fontSize:11 }}>Mã chỉ được dùng một lần duy nhất</span>
+              </div>
+
+              {/* Input */}
+              <div style={{ width:"100%", position:"relative" }}>
+                <input
+                  value={giftcodeVal}
+                  onChange={e => { setGiftcodeVal(e.target.value.toUpperCase()); setGiftcodeStatus("idle"); }}
+                  placeholder="VD: HARU88WELCOME"
+                  maxLength={24}
+                  style={{
+                    width:"100%", boxSizing:"border-box",
+                    background:"rgba(255,200,0,0.06)",
+                    border:`1.5px solid ${giftcodeStatus==="ok" ? "rgba(74,222,128,0.7)" : giftcodeStatus==="err" ? "rgba(239,68,68,0.7)" : "rgba(180,120,0,0.4)"}`,
+                    borderRadius:12, padding:"14px 18px",
+                    color:"#f5d060", fontSize:18, fontWeight:900,
+                    letterSpacing:3, textAlign:"center", outline:"none",
+                    textTransform:"uppercase",
+                  }}
+                />
+              </div>
+
+              {/* Status message */}
+              {giftcodeStatus === "ok" && (
+                <div style={{ color:"#4ade80", fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>✅ Nhận thưởng thành công! Số dư đã được cộng.</div>
+              )}
+              {giftcodeStatus === "err" && (
+                <div style={{ color:"#f87171", fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>❌ Mã không hợp lệ hoặc đã được sử dụng.</div>
+              )}
+
+              {/* Submit */}
+              <button
+                disabled={giftcodeVal.trim().length < 4 || giftcodeStatus === "loading"}
+                onClick={() => {
+                  if (!giftcodeVal.trim()) return;
+                  setGiftcodeStatus("loading");
+                  setTimeout(() => {
+                    setGiftcodeStatus("err");
+                  }, 1200);
+                }}
+                style={{
+                  width:"100%", padding:"14px", borderRadius:12,
+                  background: giftcodeVal.trim().length < 4
+                    ? "rgba(100,60,0,0.3)"
+                    : "linear-gradient(135deg,#b45309,#d97706)",
+                  border:`1.5px solid ${giftcodeVal.trim().length < 4 ? "rgba(100,60,0,0.3)" : "rgba(245,158,11,0.5)"}`,
+                  color: giftcodeVal.trim().length < 4 ? "rgba(200,160,80,0.35)" : "white",
+                  fontWeight:900, fontSize:15, letterSpacing:1.5,
+                  cursor: giftcodeVal.trim().length < 4 ? "not-allowed" : "pointer",
+                  boxShadow: giftcodeVal.trim().length >= 4 ? "0 0 24px rgba(217,119,6,0.4), 0 4px 0 rgba(120,60,0,0.8)" : "none",
+                  transition:"all 0.15s",
+                }}
+              >
+                {giftcodeStatus === "loading" ? "Đang kiểm tra..." : "XÁC NHẬN"}
+              </button>
             </div>
           </div>
         </div>
