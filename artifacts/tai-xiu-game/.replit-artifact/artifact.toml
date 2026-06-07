@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Tài Xỉu HARU88"
+version = "1.0.0"
+id = "artifacts/tai-xiu-game"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24851
+
+[services.development]
+run = "pnpm --filter @workspace/tai-xiu-game run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tai-xiu-game", "run", "build" ]
+publicDir = "artifacts/tai-xiu-game/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24851"
+BASE_PATH = "/"

@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,13 +9,16 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: game
+    description: Game operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,7 +26,267 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthInput"
+      responses:
+        "201":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Username already taken
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /game/balance:
+    get:
+      operationId: getBalance
+      tags: [game]
+      summary: Get user balance
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+
+  /game/deposit:
+    post:
+      operationId: deposit
+      tags: [game]
+      summary: Deposit funds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositInput"
+      responses:
+        "200":
+          description: Deposit successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+
+  /game/history:
+    get:
+      operationId: getBetHistory
+      tags: [game]
+      summary: Get bet history
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Bet history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BetRecord"
+
+  /game/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [game]
+      summary: Get leaderboard
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: List all users (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+        "403":
+          description: Forbidden
+
+  /admin/users/{id}/adjust:
+    post:
+      operationId: adminAdjustBalance
+      tags: [admin]
+      summary: Add or deduct balance (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdjustBalanceInput"
+      responses:
+        "200":
+          description: Balance updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "403":
+          description: Forbidden
+
+  /admin/users/{id}/reset-password:
+    post:
+      operationId: adminResetPassword
+      tags: [admin]
+      summary: Reset user password (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInput"
+      responses:
+        "200":
+          description: Password reset
+        "403":
+          description: Forbidden
+
+  /admin/users/{id}:
+    delete:
+      operationId: adminDeleteUser
+      tags: [admin]
+      summary: Delete user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User deleted
+        "403":
+          description: Forbidden
+
+  /game/stats:
+    get:
+      operationId: getGameStats
+      tags: [game]
+      summary: Get game statistics
+      responses:
+        "200":
+          description: Game stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameStats"
+
+  /game/bet:
+    post:
+      operationId: placeBet
+      tags: [game]
+      summary: Place a bet
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BetInput"
+      responses:
+        "200":
+          description: Bet result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetResult"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +296,168 @@ components:
       required:
         - status
 
+    AuthInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+        password:
+          type: string
+          minLength: 4
+        displayName:
+          type: string
+
+    User:
+      type: object
+      required: [id, username, balance, isAdmin]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        balance:
+          type: number
+        isAdmin:
+          type: boolean
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    BalanceResponse:
+      type: object
+      required: [balance]
+      properties:
+        balance:
+          type: number
+
+    DepositInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 1000
+
+    BetInput:
+      type: object
+      required: [choice, amount]
+      properties:
+        choice:
+          type: string
+        amount:
+          type: number
+          minimum: 1000
+
+    BetRecord:
+      type: object
+      required: [id, choice, amount, won, payout, createdAt]
+      properties:
+        id:
+          type: integer
+        choice:
+          type: string
+        amount:
+          type: number
+        won:
+          type: boolean
+        payout:
+          type: number
+        dice1:
+          type: ["integer", "null"]
+        dice2:
+          type: ["integer", "null"]
+        dice3:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    BetResult:
+      type: object
+      required: [won, payout, dice1, dice2, dice3, balance]
+      properties:
+        won:
+          type: boolean
+        payout:
+          type: number
+        dice1:
+          type: integer
+        dice2:
+          type: integer
+        dice3:
+          type: integer
+        balance:
+          type: number
+
+    AdminUser:
+      type: object
+      required: [id, username, balance, isAdmin, totalBets, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        balance:
+          type: number
+        isAdmin:
+          type: boolean
+        totalBets:
+          type: integer
+        createdAt:
+          type: string
+
+    AdjustBalanceInput:
+      type: object
+      required: [amount, note]
+      properties:
+        amount:
+          type: number
+        note:
+          type: string
+
+    ResetPasswordInput:
+      type: object
+      required: [newPassword]
+      properties:
+        newPassword:
+          type: string
+          minLength: 4
+
+    LeaderboardEntry:
+      type: object
+      required: [username, totalBets, totalWon, winRate]
+      properties:
+        username:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        totalBets:
+          type: integer
+        totalWon:
+          type: number
+        winRate:
+          type: number
+
+    GameStats:
+      type: object
+      required: [totalBets, totalWon, winRate, biggestWin]
+      properties:
+        totalBets:
+          type: integer
+        totalWon:
+          type: number
+        winRate:
+          type: number
+        biggestWin:
+          type: number
