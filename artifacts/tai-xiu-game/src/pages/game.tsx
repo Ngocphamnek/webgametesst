@@ -1747,6 +1747,43 @@ export default function Game() {
               >
                 {giftcodeStatus === "loading" ? "Đang kiểm tra..." : "XÁC NHẬN"}
               </button>
+
+              {/* Divider */}
+              <div style={{ width:"100%", display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ flex:1, height:1, background:"rgba(180,120,0,0.25)" }} />
+                <span style={{ color:"rgba(200,160,80,0.45)", fontSize:11, fontWeight:600, letterSpacing:1 }}>HOẶC</span>
+                <div style={{ flex:1, height:1, background:"rgba(180,120,0,0.25)" }} />
+              </div>
+
+              {/* Facebook Fanpage section */}
+              <div style={{ width:"100%", background:"linear-gradient(135deg,rgba(24,119,242,0.12),rgba(10,60,130,0.1))", border:"1.5px solid rgba(24,119,242,0.35)", borderRadius:14, padding:"16px 18px", display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  <span style={{ color:"#60a5fa", fontWeight:900, fontSize:13, letterSpacing:0.5 }}>
+                    "Like" us on <span style={{ color:"#1877f2" }}>facebook</span>
+                  </span>
+                </div>
+                <div style={{ color:"rgba(150,190,255,0.65)", fontSize:11, textAlign:"center", lineHeight:1.6 }}>
+                  Theo dõi Fanpage của chúng tôi để cập nhật<br/>những thông tin &amp; giftcode mới nhất
+                </div>
+                <a
+                  href="https://facebook.com/haru88official"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display:"flex", alignItems:"center", gap:8,
+                    padding:"10px 28px", borderRadius:10,
+                    background:"linear-gradient(135deg,#1877f2,#0d5bc4)",
+                    border:"1.5px solid rgba(24,119,242,0.5)",
+                    color:"white", fontWeight:900, fontSize:13, letterSpacing:1,
+                    textDecoration:"none",
+                    boxShadow:"0 0 18px rgba(24,119,242,0.4), 0 3px 0 rgba(5,30,80,0.8)",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  📘 FANPAGE
+                </a>
+              </div>
             </div>
           </div>
         </div>
